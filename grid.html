@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Lines Draft: The Grid</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+
+    :root {
+      --font-family: 'Ubuntu', sans-serif;
+
+      --field-height: min(80vh, 80vw);
+      --field-border-color: hsl(var(--bc)/.7);
+      --field-background-color: #191D24;
+      --cell-border-color: hsl(var(--bc)/.7);
+      --cell-background-color: #2A303C;
+      --ball-red-color: red;
+      --ball-yellow-color: yellow;
+      --ball-navy-color: navy;
+      --ball-blue-color: blue;
+      --ball-purple-color: #6419E6;
+      --ball-green-color: green;
+
+      --primary: #6419E6;
+      --secondary: #D926A9;
+      --accent: #1FB2A6;
+      --neutral: #191D24;
+      --base-100: #2A303C;
+      --info: #3ABFF8;
+      --success: #36D399;
+      --warning: #FBBD23;
+      --error: #F87272;
+      --bc: 220 13% 69%;
+      --text: rgb(166, 173, 186);
+      --text-muted: hsl(var(--bc)/.7);
+
+      --glass-border-radius: 20px;
+    }
+
+    *,
+    ::after,
+    ::before {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--base-100);
+      color: var(--text);
+      margin: 0;
+    }
+
+    .top_gradient_block {
+      position: absolute;
+      z-index: -1;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50vh;
+      min-height: 400px;
+      background: rgb(100, 25, 230);
+      background: linear-gradient(135deg, rgba(100, 25, 230, 1) 0%, rgba(217, 38, 169, 1) 100%);
+    }
+
+    .main_container {
+      height: 100vh;
+      width: 100wh;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .glass {
+      display: flex;
+      flex-direction: column;
+      padding: 25px 25px 0 25px;
+      border: none;
+      border-radius: var(--glass-border-radius);
+      -webkit-backdrop-filter: blur(40px);
+      backdrop-filter: blur(40px);
+      background-color: transparent;
+      background-image: linear-gradient(135deg, rgb(255 255 255/30%) 0%, rgb(0 0 0/0%) 100%), linear-gradient(100deg, rgb(255 255 255/10%) 25%, rgb(0 0 0/0%) 25%);
+      box-shadow: 0 0 0 1px rgb(255 255 255/10%) inset, 0 0 0 2px #0000000d;
+      text-shadow: 0 1px rgb(0 0 0/5%);
+    }
+
+    .field {
+      height: var(--field-height);
+      aspect-ratio: 1 / 1;
+      /* https://css-tricks.com/almanac/properties/a/aspect-ratio/ */
+      margin: 0 0 10px 0;
+      padding: 1px 1px;
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      grid-template-rows: repeat(9, 1fr);
+      gap: 1px 1px;
+      background-color: var(--field-background-color);
+      border: 2px outset var(--field-border-color);
+      cursor: default;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-evenly;
+      margin: 0 0 10px 0;
+    }
+
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--cell-background-color);
+      border: 2px outset var(--cell-border-color);
+    }
+
+    .ball {
+      width: 80%;
+      height: 80%;
+      border-radius: 50%;
+    }
+
+    .ball-purple {
+      background-color: var(--ball-purple-color);
+    }
+
+    .ball-red {
+      background-color: var(--ball-red-color);
+    }
+
+    .ball-yellow {
+      background-color: var(--ball-yellow-color);
+    }
+
+    .ball-blue {
+      background-color: var(--ball-blue-color);
+    }
+
+    .ball-navy {
+      background-color: var(--ball-navy-color);
+    }
+
+    .ball-green {
+      background-color: var(--ball-green-color);
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 5px;
+      padding: 1rem 1.5rem;
+      font-family: var(--font-family);
+      font-size: 1rem;
+      color: var(--neutral);
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.2s all;
+    }
+
+    .btn:hover {
+      transform: scale(1.01);
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-success {
+      background-color: var(--success);
+    }
+
+    .btn-warning {
+      background-color: var(--warning);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="top_gradient_block"></div>
+  <main class="main_container">
+    <div class="glass">
+      <div id="field" class="field"></div>
+      <div class="controls">
+        <button class="btn btn-success" onclick="addRandomBallButton();">Random Ball</button>
+        <button class="btn btn-warning" onclick="resetGameButton();">Reset game</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const fieldSize = 9;
+    const ballColors = ["purple", "red", "blue", "navy", "yellow", "green"];
+    let field = [];
+
+    //
+    // Game logic functions
+    //
+    function resetFieldArray() {
+      for (i = 0; i < fieldSize; i++) {
+        field[i] = [];
+        for (j = 0; j < fieldSize; j++) {
+          field[i][j] = null;
+        }
+      }
+    }
+
+    function getFreeCells() {
+      // Returns list of free cells in field array, each cell represented by object like {x: 0, y: 0}
+      freeCells = [];
+      for (y = 0; y < fieldSize; y++) {
+        for (x = 0; x < fieldSize; x++) {
+          if (field[x][y] === null) {
+            freeCells.push({ "x": x, "y": y });
+          }
+        }
+      }
+      return freeCells;
+    }
+
+    function getRandomFreeCell() {
+      // Returns random free cell coords as object {x: 0, y: 0}
+      freeCells = getFreeCells();
+      randomFreeCell = null;
+
+      if (freeCells) {
+        randomCellIndex = Math.floor(Math.random() * (freeCells.length));
+        console.log(freeCells);
+        randomFreeCell = freeCells[randomCellIndex];
+      }
+
+      return randomFreeCell;
+    }
+
+    function getRandomColor() {
+      // Returns a random color name
+      randomColorIndex = Math.floor(Math.random() * (ballColors.length));
+      return ballColors[randomColorIndex];
+    }
+
+    function addRandomBall() {
+      // Adds a random ball to the game field
+      // Returns true if ball was added, otherwise false
+      randomFreeCell = getRandomFreeCell();
+
+      if (randomFreeCell) {
+        x = randomFreeCell.x;
+        y = randomFreeCell.y;
+        color = getRandomColor();
+        console.log(`Random cell is (${x}, ${y}); random color is ${color}`);
+        field[x][y] = color;
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    //
+    // Interface functions
+    //
+    function drawBalls() {
+      // Renders `field` array to the `field` div grid
+      for (y = 0; y < fieldSize; y++) {
+        for (x = 0; x < fieldSize; x++) {
+          cellDiv = document.getElementById(`cell-${x}-${y}`);
+          color = null;
+          if (field[x][y]) {
+            color = field[x][y];
+          }
+          cellDiv.innerHTML = `<div id="ball-${x}-${y}" class="ball ball-${color}" data-x="${x}" data-y="${y}" onclick="onBallClick(event);"></div>`;
+        }
+      }
+    }
+
+    function onBallClick(event) {
+      if (event.target.id.startsWith('ball-')) {
+        console.log(`Ball clicked (x=${event.target.dataset.x}, y=${event.target.dataset.y})`);
+      }
+
+      event.stopPropagation();
+    }
+
+    function onCellClick(event) {
+      if (event.target.id.startsWith('cell-')) {
+        console.log(`Cell (x=${event.target.dataset.x}, y=${event.target.dataset.y})`);
+      }
+
+      event.stopPropagation();
+    }
+
+    function addRandomBallButton() {
+      if (addRandomBall()) {
+        drawBalls();
+      } else {
+        alert('Game Over!');
+      }
+    }
+
+    function resetGameButton() {
+      resetFieldArray();
+      drawBalls();
+    }
+
+    //
+    // Program entry
+    //
+
+    // Fill field with cells
+    fieldDiv = document.getElementById("field");
+    for (y = 0; y < fieldSize; y++) {
+      for (x = 0; x < fieldSize; x++) {
+        fieldDiv.innerHTML += `<div id="cell-${x}-${y}" class="cell" data-x="${x}" data-y="${y}" onclick="onCellClick(event);"></div>`;
+      }
+    }
+
+    resetFieldArray();
+  </script>
+</body>
+
+</html>
