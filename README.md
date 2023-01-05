@@ -1,7 +1,6 @@
 ## TODOs:
 
 ### Logic
-- Ball moving (without path detection)
 - Ball moving (with pathfinding)
 - Detect lines (straight, diagonal) of same color
 

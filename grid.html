@@ -292,7 +292,7 @@
           let color = null;
           let isSelected = false;
 
-          if (field[x][y]) {
+          if (field[x][y] != null) {
             color = field[x][y];
 
             if (selectedBall) {
@@ -300,9 +300,11 @@
                 isSelected = true;
               }
             }
-          }
 
-          cellDiv.innerHTML = `<div id="ball-${x}-${y}" class="ball ball-${color} ${isSelected ? ' ball-selected' : ' '}" data-x="${x}" data-y="${y}" onclick="onBallClick(event);"></div>`;
+            cellDiv.innerHTML = `<div id="ball-${x}-${y}" class="ball ball-${color} ${isSelected ? ' ball-selected' : ' '}" data-x="${x}" data-y="${y}" onclick="onBallClick(event);"></div>`;
+          } else {
+            cellDiv.innerHTML = '';
+          }
         }
       }
     }
@@ -322,8 +324,21 @@
     }
 
     function onCellClick(event) {
+      // Moves selected ball to the clicked cell (if it's free), then redraws the field.
       if (event.target.id.startsWith('cell-')) {
-        console.log(`Cell (x=${event.target.dataset.x}, y=${event.target.dataset.y})`);
+        let x = event.target.dataset.x;
+        let y = event.target.dataset.y;
+        console.log(`Cell (x=${x}, y=${y})`);
+
+        if (selectedBall) {
+          if (field[x][y] == null) {
+            // Act only if the clicked cell is free!
+            let color = field[selectedBall.x][selectedBall.y];
+            field[selectedBall.x][selectedBall.y] = null;
+            field[x][y] = color;
+            drawBalls();
+          }
+        }
       }
 
       event.stopPropagation();
