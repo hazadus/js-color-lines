@@ -134,38 +134,36 @@
 
     @keyframes bounce {
       10% {
-        height: 75%;
+        transform: scaleY(0.95);
       }
 
       50% {
-        height: 70%;
-        width: 85%;
-        transform: translateY(-7px);
+        transform: scaleY(0.90) scaleX(1.05) translateY(-7px);
       }
     }
 
     .ball-purple {
-      background-color: var(--ball-purple-color);
+      background: radial-gradient(circle at 40% 40%, var(--ball-purple-color), #000);
     }
 
     .ball-red {
-      background-color: var(--ball-red-color);
+      background: radial-gradient(circle at 40% 40%, var(--ball-red-color), #000);
     }
 
     .ball-yellow {
-      background-color: var(--ball-yellow-color);
+      background: radial-gradient(circle at 40% 40%, var(--ball-yellow-color), #000);
     }
 
     .ball-blue {
-      background-color: var(--ball-blue-color);
+      background: radial-gradient(circle at 40% 40%, var(--ball-blue-color), #000);
     }
 
     .ball-navy {
-      background-color: var(--ball-navy-color);
+      background: radial-gradient(circle at 40% 40%, var(--ball-navy-color), #000);
     }
 
     .ball-green {
-      background-color: var(--ball-green-color);
+      background: radial-gradient(circle at 40% 40%, var(--ball-green-color), #000);
     }
 
     .btn {
