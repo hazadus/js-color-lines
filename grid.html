@@ -120,6 +120,28 @@
       width: 80%;
       height: 80%;
       border-radius: 50%;
+      transition: 0.2s all;
+      cursor: pointer;
+    }
+
+    .ball:hover {
+      transform: scale(1.04);
+    }
+
+    .ball-selected {
+      animation: bounce 1s infinite ease-in;
+    }
+
+    @keyframes bounce {
+      10% {
+        height: 75%;
+      }
+
+      50% {
+        height: 70%;
+        width: 85%;
+        transform: translateY(-7px);
+      }
     }
 
     .ball-purple {
@@ -189,9 +211,13 @@
   </main>
 
   <script>
+    //
+    // Global stuff
+    //
     const fieldSize = 9;
     const ballColors = ["purple", "red", "blue", "navy", "yellow", "green"];
     let field = [];
+    let selectedBall = null;
 
     //
     // Game logic functions
@@ -262,19 +288,34 @@
       // Renders `field` array to the `field` div grid
       for (y = 0; y < fieldSize; y++) {
         for (x = 0; x < fieldSize; x++) {
-          cellDiv = document.getElementById(`cell-${x}-${y}`);
-          color = null;
+          let cellDiv = document.getElementById(`cell-${x}-${y}`);
+          let color = null;
+          let isSelected = false;
+
           if (field[x][y]) {
             color = field[x][y];
+
+            if (selectedBall) {
+              if (selectedBall.x == x && selectedBall.y == y) {
+                isSelected = true;
+              }
+            }
           }
-          cellDiv.innerHTML = `<div id="ball-${x}-${y}" class="ball ball-${color}" data-x="${x}" data-y="${y}" onclick="onBallClick(event);"></div>`;
+
+          cellDiv.innerHTML = `<div id="ball-${x}-${y}" class="ball ball-${color} ${isSelected ? ' ball-selected' : ' '}" data-x="${x}" data-y="${y}" onclick="onBallClick(event);"></div>`;
         }
       }
     }
 
     function onBallClick(event) {
+      // Sets `selectedBall` to the clicked ball's (x,y), then redraws the field
       if (event.target.id.startsWith('ball-')) {
-        console.log(`Ball clicked (x=${event.target.dataset.x}, y=${event.target.dataset.y})`);
+        console.log(`Ball selected (x=${event.target.dataset.x}, y=${event.target.dataset.y})`);
+        selectedBall = {
+          "x": event.target.dataset.x,
+          "y": event.target.dataset.y
+        };
+        drawBalls();
       }
 
       event.stopPropagation();
@@ -302,7 +343,7 @@
     }
 
     //
-    // Program entry
+    // Program entry point
     //
 
     // Fill field with cells
