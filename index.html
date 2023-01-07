@@ -207,7 +207,7 @@
     <div class="glass">
       <div id="field" class="field"></div>
       <div class="controls">
-        <button class="btn btn-success" onclick="addRandomBallButton();">Random Ball</button>
+        <button class="btn btn-success" onclick="newGameButton();">New Game</button>
         <button class="btn btn-warning" onclick="resetGameButton();">Reset game</button>
       </div>
     </div>
@@ -221,6 +221,7 @@
     const ballColors = ["purple", "red", "blue", "navy", "yellow", "green"];
     const newBallsEachTurn = 3;
     let field = [];
+    let isGameOver = true;
     let selectedBall = null;
 
     //
@@ -290,7 +291,10 @@
       // Adds new balls to the field after player's move
       //
       for (let i = 0; i < newBallsEachTurn; i++) {
-        addRandomBall();
+        if (!addRandomBall()) {
+          isGameOver = true;
+          break;
+        }
       }
     }
 
@@ -446,17 +450,20 @@
       }
     }
 
-    function addRandomBallButton() {
-      if (addRandomBall()) {
+    function newGameButton() {
+      if (isGameOver) {
+        isGameOver = false;
+        addNewBalls();
         drawBalls();
-      } else {
-        alert('Game Over!');
       }
     }
 
     function resetGameButton() {
-      resetFieldArray();
-      drawBalls();
+      if (!isGameOver) {
+        isGameOver = true;
+        resetFieldArray();
+        drawBalls();
+      }
     }
 
     //

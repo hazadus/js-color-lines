@@ -1,6 +1,7 @@
 08.01.2023, Su
   - 01:00 - Ball path highlighting added.
   - 01:00 - Three random balls added after each move.
+  - 01:25 - 'Random ball' button refactored to 'New game'.
 
 06.01.2023, Fr
   - 00:45 - game field created and styled, random balls generated on button click, game over detection, game reset button.
