@@ -219,6 +219,7 @@
     //
     const fieldSize = 9;
     const ballColors = ["purple", "red", "blue", "navy", "yellow", "green"];
+    const newBallsEachTurn = 3;
     let field = [];
     let selectedBall = null;
 
@@ -281,6 +282,15 @@
         return true;
       } else {
         return false;
+      }
+    }
+
+    function addNewBalls() {
+      //
+      // Adds new balls to the field after player's move
+      //
+      for (let i = 0; i < newBallsEachTurn; i++) {
+        addRandomBall();
       }
     }
 
@@ -371,6 +381,7 @@
               field[x][y] = color;
               selectedBall = null;
               unlitAllCells();
+              addNewBalls();
             }
 
             drawBalls();
