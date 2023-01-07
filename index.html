@@ -220,6 +220,7 @@
     const fieldSize = 9;
     const ballColors = ["purple", "red", "blue", "navy", "yellow", "green"];
     const newBallsEachTurn = 3;
+    const minLineLength = 5;
     let field = [];
     let isGameOver = true;
     let selectedBall = null;
@@ -256,7 +257,7 @@
 
       if (freeCells) {
         let randomCellIndex = Math.floor(Math.random() * (freeCells.length));
-        console.log(freeCells);
+        // console.log(freeCells);
         randomFreeCell = freeCells[randomCellIndex];
       }
 
@@ -278,7 +279,7 @@
         let x = randomFreeCell.x;
         let y = randomFreeCell.y;
         let color = getRandomColor();
-        console.log(`Random cell is (${x}, ${y}); random color is ${color}`);
+        // console.log(`Random cell is (${x}, ${y}); random color is ${color}`);
         field[x][y] = color;
         return true;
       } else {
@@ -322,6 +323,55 @@
       return astar.search(graph, start, end);  // return array containing the shortest path
     }
 
+    function findHorizontalLine(x, y, lineArray) {
+      // on first call, lineArray[0] contains object with info about starting cell
+      // {x, y, color}
+      let prevColor = lineArray[lineArray.length - 1].color;
+
+      let color = field[x][y];
+      if (color == null || color != prevColor) {
+        // If current cell is clear or contains ball of another color, end recursion
+        return lineArray;
+      }
+
+      if (color == prevColor) {
+        // Add this cell to line array
+        lineArray.push({ "x": x, "y": y, "color": color });
+      }
+
+      if (x == fieldSize - 1) {
+        return lineArray;
+      } else {
+        return findHorizontalLine(x + 1, y, lineArray);
+      }
+    }
+
+    function searchForHorizontalLines() {
+      for (let y = 0; y < fieldSize; y++) {
+        for (let x = 0; x <= fieldSize - minLineLength; x++) {
+          let line = findHorizontalLine(x + 1, y, [
+            {
+              "x": x,
+              "y": y,
+              "color": field[x][y],
+            }
+          ])
+          if (line.length >= minLineLength) {
+            return line;
+          }
+        }
+      }
+      return null;
+    }
+
+    function removeLine(
+      lineArray  // array of objects {x, y, color}
+    ) {
+      lineArray.forEach((value) => {
+        field[value.x][value.y] = null;
+      })
+    }
+
     //
     // Interface functions
     //
@@ -353,7 +403,7 @@
     function onBallClick(event) {
       // Sets `selectedBall` to the clicked ball's (x,y), then redraws the field
       if (event.target.id.startsWith('ball-')) {
-        console.log(`Ball selected (x=${event.target.dataset.x}, y=${event.target.dataset.y})`);
+        // console.log(`Ball selected (x=${event.target.dataset.x}, y=${event.target.dataset.y})`);
         selectedBall = {
           "x": event.target.dataset.x,
           "y": event.target.dataset.y
@@ -369,14 +419,14 @@
       if (event.target.id.startsWith('cell-')) {
         let x = event.target.dataset.x;
         let y = event.target.dataset.y;
-        console.log(`Cell (x=${x}, y=${y})`);
+        // console.log(`Cell (x=${x}, y=${y})`);
 
         if (selectedBall) {
           if (field[x][y] == null) {
             // Act only if the clicked cell is free!
 
             let path = findPath(selectedBall.x, selectedBall.y, x, y);
-            console.log(path);
+            // console.log(path);
 
             if (path.length) {
               // Actually move the ball if there's path, reset stuff
@@ -386,6 +436,13 @@
               selectedBall = null;
               unlitAllCells();
               addNewBalls();
+
+              line = searchForHorizontalLines();
+              if (line) {
+                console.log("FOUND A LINE!");
+                console.log(line);
+                removeLine(line);
+              }
             }
 
             drawBalls();
@@ -421,18 +478,18 @@
       //
       let x = event.target.dataset.x;
       let y = event.target.dataset.y;
-      console.log(`> Mouse entered cell (x=${x}, y=${y})`);
+      // console.log(`> Mouse entered cell (x=${x}, y=${y})`);
 
       if (selectedBall) {
         // Try to find the path for selected ball to the current cell
         let path = findPath(selectedBall.x, selectedBall.y, x, y);
         if (path.length) {
-          console.log('Ball can get here!');
+          // console.log('Ball can get here!');
           // Highlight ball's location and the path
           highlightCell({ "x": selectedBall.x, "y": selectedBall.y });
           path.forEach(highlightCell);
         } else {
-          console.log('Ball CAN NOT get here!');
+          // console.log('Ball CAN NOT get here!');
         }
       }
     }
@@ -443,7 +500,7 @@
       //
       let x = event.target.dataset.x;
       let y = event.target.dataset.y;
-      console.log(`< Mouse leaved cell (x=${x}, y=${y})`);
+      // console.log(`< Mouse left cell (x=${x}, y=${y})`);
 
       if (selectedBall) {
         unlitAllCells();

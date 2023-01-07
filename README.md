@@ -2,6 +2,7 @@
 
 ### Logic
 - Detect lines (straight, diagonal) of same color
+- - https://en.wikipedia.org/wiki/Hough_transform
 - Track game score
 - Save highscore
 

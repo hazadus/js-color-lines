@@ -2,6 +2,7 @@
   - 01:00 - Ball path highlighting added.
   - 01:00 - Three random balls added after each move.
   - 01:25 - 'Random ball' button refactored to 'New game'.
+  - 02:14 - Horizontal lines are found and removed after player's move.
 
 06.01.2023, Fr
   - 00:45 - game field created and styled, random balls generated on button click, game over detection, game reset button.
