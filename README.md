@@ -2,12 +2,15 @@
 
 ### Logic
 - Ball moving (with pathfinding)
+- - https://briangrinstead.com/blog/astar-search-algorithm-in-javascript/
+- - https://dev.to/codesphere/pathfinding-with-javascript-the-a-algorithm-3jlb
 - Add three random balls after each move
 - Detect lines (straight, diagonal) of same color
 - Track game score
 - Save highscore
 
 ### UI
+- Highlight shortest path
 - Full width (with padding) on mobile screen
 - Score field
 - Highscore field

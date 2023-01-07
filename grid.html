@@ -66,7 +66,7 @@
 
     .main_container {
       height: 100vh;
-      width: 100wh;
+      width: 100vw;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -194,6 +194,7 @@
       background-color: var(--warning);
     }
   </style>
+  <script type="text/javascript" src="astar.js"></script>
 </head>
 
 <body>
@@ -221,9 +222,9 @@
     // Game logic functions
     //
     function resetFieldArray() {
-      for (i = 0; i < fieldSize; i++) {
+      for (let i = 0; i < fieldSize; i++) {
         field[i] = [];
-        for (j = 0; j < fieldSize; j++) {
+        for (let j = 0; j < fieldSize; j++) {
           field[i][j] = null;
         }
       }
@@ -231,9 +232,9 @@
 
     function getFreeCells() {
       // Returns list of free cells in field array, each cell represented by object like {x: 0, y: 0}
-      freeCells = [];
-      for (y = 0; y < fieldSize; y++) {
-        for (x = 0; x < fieldSize; x++) {
+      let freeCells = [];
+      for (let y = 0; y < fieldSize; y++) {
+        for (let x = 0; x < fieldSize; x++) {
           if (field[x][y] === null) {
             freeCells.push({ "x": x, "y": y });
           }
@@ -244,11 +245,11 @@
 
     function getRandomFreeCell() {
       // Returns random free cell coords as object {x: 0, y: 0}
-      freeCells = getFreeCells();
-      randomFreeCell = null;
+      let freeCells = getFreeCells();
+      let randomFreeCell = null;
 
       if (freeCells) {
-        randomCellIndex = Math.floor(Math.random() * (freeCells.length));
+        let randomCellIndex = Math.floor(Math.random() * (freeCells.length));
         console.log(freeCells);
         randomFreeCell = freeCells[randomCellIndex];
       }
@@ -258,19 +259,19 @@
 
     function getRandomColor() {
       // Returns a random color name
-      randomColorIndex = Math.floor(Math.random() * (ballColors.length));
+      let randomColorIndex = Math.floor(Math.random() * (ballColors.length));
       return ballColors[randomColorIndex];
     }
 
     function addRandomBall() {
       // Adds a random ball to the game field
       // Returns true if ball was added, otherwise false
-      randomFreeCell = getRandomFreeCell();
+      let randomFreeCell = getRandomFreeCell();
 
       if (randomFreeCell) {
-        x = randomFreeCell.x;
-        y = randomFreeCell.y;
-        color = getRandomColor();
+        let x = randomFreeCell.x;
+        let y = randomFreeCell.y;
+        let color = getRandomColor();
         console.log(`Random cell is (${x}, ${y}); random color is ${color}`);
         field[x][y] = color;
         return true;
@@ -279,13 +280,41 @@
       }
     }
 
+    function findPath(startX, startY, endX, endY) {
+      // Return array containing the shortest path
+
+      // Create array for astar.js
+      // 0 = wall, 1 = clear
+      let graphArray = [];
+      for (let i = 0; i < fieldSize; i++) {
+        graphArray[i] = [];
+        for (let j = 0; j < fieldSize; j++) {
+          graphArray[i][j] = 1;
+        }
+      }
+      // TODO: refactor!
+      for (let yy = 0; yy < fieldSize; yy++) {
+        for (let xx = 0; xx < fieldSize; xx++) {
+          if (field[xx][yy] != null) {
+            graphArray[xx][yy] = 0;  // 0 is wall for astar.js
+          }
+        }
+      }
+
+      let graph = new Graph(graphArray);
+      let start = graph.grid[startX][startY];
+      let end = graph.grid[endX][endY];
+
+      return astar.search(graph, start, end);  // return array containing the shortest path
+    }
+
     //
     // Interface functions
     //
     function drawBalls() {
       // Renders `field` array to the `field` div grid
-      for (y = 0; y < fieldSize; y++) {
-        for (x = 0; x < fieldSize; x++) {
+      for (let y = 0; y < fieldSize; y++) {
+        for (let x = 0; x < fieldSize; x++) {
           let cellDiv = document.getElementById(`cell-${x}-${y}`);
           let color = null;
           let isSelected = false;
@@ -331,9 +360,17 @@
         if (selectedBall) {
           if (field[x][y] == null) {
             // Act only if the clicked cell is free!
-            let color = field[selectedBall.x][selectedBall.y];
-            field[selectedBall.x][selectedBall.y] = null;
-            field[x][y] = color;
+
+            let result = findPath(selectedBall.x, selectedBall.y, x, y);
+            console.log(result);
+
+            if (result.length) {
+              // Actually move the ball if there's path
+              let color = field[selectedBall.x][selectedBall.y];
+              field[selectedBall.x][selectedBall.y] = null;
+              field[x][y] = color;
+            }
+
             drawBalls();
           }
         }
@@ -361,8 +398,8 @@
 
     // Fill field with cells
     fieldDiv = document.getElementById("field");
-    for (y = 0; y < fieldSize; y++) {
-      for (x = 0; x < fieldSize; x++) {
+    for (let y = 0; y < fieldSize; y++) {
+      for (let x = 0; x < fieldSize; x++) {
         fieldDiv.innerHTML += `<div id="cell-${x}-${y}" class="cell" data-x="${x}" data-y="${y}" onclick="onCellClick(event);"></div>`;
       }
     }
