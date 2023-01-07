@@ -116,6 +116,10 @@
       border: 2px outset var(--cell-border-color);
     }
 
+    .cell-highlight-path {
+      background-color: var(--cell-border-color);
+    }
+
     .ball {
       width: 80%;
       height: 80%;
@@ -282,22 +286,18 @@
 
     function findPath(startX, startY, endX, endY) {
       // Return array containing the shortest path
+      // Length of array equal to zero means there's no available path.
 
       // Create array for astar.js
       // 0 = wall, 1 = clear
       let graphArray = [];
       for (let i = 0; i < fieldSize; i++) {
         graphArray[i] = [];
-        for (let j = 0; j < fieldSize; j++) {
-          graphArray[i][j] = 1;
-        }
       }
-      // TODO: refactor!
+
       for (let yy = 0; yy < fieldSize; yy++) {
         for (let xx = 0; xx < fieldSize; xx++) {
-          if (field[xx][yy] != null) {
-            graphArray[xx][yy] = 0;  // 0 is wall for astar.js
-          }
+          graphArray[xx][yy] = field[xx][yy] != null ? 0 : 1;  // 0 = wall, 1 = clear
         }
       }
 
@@ -361,14 +361,16 @@
           if (field[x][y] == null) {
             // Act only if the clicked cell is free!
 
-            let result = findPath(selectedBall.x, selectedBall.y, x, y);
-            console.log(result);
+            let path = findPath(selectedBall.x, selectedBall.y, x, y);
+            console.log(path);
 
-            if (result.length) {
-              // Actually move the ball if there's path
+            if (path.length) {
+              // Actually move the ball if there's path, reset stuff
               let color = field[selectedBall.x][selectedBall.y];
               field[selectedBall.x][selectedBall.y] = null;
               field[x][y] = color;
+              selectedBall = null;
+              unlitAllCells();
             }
 
             drawBalls();
@@ -377,6 +379,60 @@
       }
 
       event.stopPropagation();
+    }
+
+    function getCellDiv(x, y) {
+      const cellID = `cell-${x}-${y}`;
+      return document.getElementById(cellID);
+    }
+
+    function highlightCell(value) {
+      // `value` is a cell object from astar.js-generated path
+      let cellDiv = getCellDiv(value.x, value.y);
+      cellDiv.classList.add("cell-highlight-path");
+    }
+
+    function unlitAllCells() {
+      for (let y = 0; y < fieldSize; y++) {
+        for (let x = 0; x < fieldSize; x++) {
+          getCellDiv(x, y).classList.remove("cell-highlight-path");
+        }
+      }
+    }
+
+    function onCellMouseEnter(event) {
+      //
+      // If a ball selected, try to build path to underlying cell and highlight the path.
+      //
+      let x = event.target.dataset.x;
+      let y = event.target.dataset.y;
+      console.log(`> Mouse entered cell (x=${x}, y=${y})`);
+
+      if (selectedBall) {
+        // Try to find the path for selected ball to the current cell
+        let path = findPath(selectedBall.x, selectedBall.y, x, y);
+        if (path.length) {
+          console.log('Ball can get here!');
+          // Highlight ball's location and the path
+          highlightCell({ "x": selectedBall.x, "y": selectedBall.y });
+          path.forEach(highlightCell);
+        } else {
+          console.log('Ball CAN NOT get here!');
+        }
+      }
+    }
+
+    function onCellMouseLeave(event) {
+      //
+      // Reset cells colors to default (if any ball is selected).
+      //
+      let x = event.target.dataset.x;
+      let y = event.target.dataset.y;
+      console.log(`< Mouse leaved cell (x=${x}, y=${y})`);
+
+      if (selectedBall) {
+        unlitAllCells();
+      }
     }
 
     function addRandomBallButton() {
@@ -400,7 +456,7 @@
     fieldDiv = document.getElementById("field");
     for (let y = 0; y < fieldSize; y++) {
       for (let x = 0; x < fieldSize; x++) {
-        fieldDiv.innerHTML += `<div id="cell-${x}-${y}" class="cell" data-x="${x}" data-y="${y}" onclick="onCellClick(event);"></div>`;
+        fieldDiv.innerHTML += `<div id="cell-${x}-${y}" class="cell" data-x="${x}" data-y="${y}" onclick="onCellClick(event);" onmouseenter="onCellMouseEnter(event);" onmouseleave="onCellMouseLeave(event);"></div>`;
       }
     }
 

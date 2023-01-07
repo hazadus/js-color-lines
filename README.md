@@ -10,7 +10,6 @@
 - Save highscore
 
 ### UI
-- Highlight shortest path
 - Full width (with padding) on mobile screen
 - Score field
 - Highscore field
