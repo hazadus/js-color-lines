@@ -323,10 +323,10 @@
       return astar.search(graph, start, end);  // return array containing the shortest path
     }
 
-    function findHorizontalLine(x, y, lineArray) {
+    function findLine(x, y, dx, dy, lineArray) {
       //
       // Recursive function to find a line of balls of the same color in the `field` array.
-      // Currently ONLY horizontal lines.
+      // Currently ONLY horizontal/vertical lines.
       // on first call, lineArray[0] contains object with info about starting cell
       // {x, y, color}
       let prevColor = lineArray[lineArray.length - 1].color;
@@ -343,36 +343,50 @@
       }
 
       // Decide if we stop or continue recursion
-      if (x == fieldSize - 1) {
+      if ((dx && x == fieldSize - 1) || (dy && y == fieldSize - 1)) {
         return lineArray;
       } else {
-        return findHorizontalLine(x + 1, y, lineArray);
+        return findLine(x + dx, y + dy, dx, dy, lineArray);
       }
     }
 
-    function searchForHorizontalLines() {
+    function searchForLines() {
       //
       // Scans `field` for lines of balls of same color with `minLineLength`
-      // (Currently ONLY horizontal lines!)
+      // (Currently ONLY horizontal/vertical lines!)
       // Returns: line array [{x, y, color}] or `null`.
       //
-      for (let y = 0; y < fieldSize; y++) {
-        for (let x = 0; x <= fieldSize - minLineLength; x++) {
-          // Start search for a line only if current cell has a ball in it
-          if (field[x][y]) {
-            let line = findHorizontalLine(x + 1, y, [
-              {
-                "x": x,
-                "y": y,
-                "color": field[x][y],
+      const deltas = [
+        { "dx": 1, "dy": 0 },
+        { "dx": 0, "dy": 1 },
+      ]
+
+      for (let iDelta = 0; iDelta < deltas.length; iDelta++) {
+        let dx = deltas[iDelta].dx;
+        let dy = deltas[iDelta].dy;
+
+        let maxX = dx ? fieldSize - minLineLength + 1 : fieldSize;
+        let maxY = dy ? fieldSize - minLineLength + 1 : fieldSize;
+
+        for (let y = 0; y < maxY; y++) {
+          for (let x = 0; x < maxX; x++) {
+            // Start search for a line only if current cell has a ball in it
+            if (field[x][y]) {
+              let line = findLine(x + dx, y + dy, dx, dy, [
+                {
+                  "x": x,
+                  "y": y,
+                  "color": field[x][y],
+                }
+              ])
+              if (line.length >= minLineLength) {
+                return line;
               }
-            ])
-            if (line.length >= minLineLength) {
-              return line;
             }
           }
         }
       }
+
       return null;
     }
 
@@ -449,7 +463,7 @@
               unlitAllCells();
               addNewBalls();
 
-              line = searchForHorizontalLines();
+              line = searchForLines();
               if (line) {
                 console.log("FOUND A LINE!");
                 console.log(line);
