@@ -324,6 +324,9 @@
     }
 
     function findHorizontalLine(x, y, lineArray) {
+      //
+      // Recursive function to find a line of balls of the same color in the `field` array.
+      // Currently ONLY horizontal lines.
       // on first call, lineArray[0] contains object with info about starting cell
       // {x, y, color}
       let prevColor = lineArray[lineArray.length - 1].color;
@@ -339,6 +342,7 @@
         lineArray.push({ "x": x, "y": y, "color": color });
       }
 
+      // Decide if we stop or continue recursion
       if (x == fieldSize - 1) {
         return lineArray;
       } else {
@@ -347,17 +351,25 @@
     }
 
     function searchForHorizontalLines() {
+      //
+      // Scans `field` for lines of balls of same color with `minLineLength`
+      // (Currently ONLY horizontal lines!)
+      // Returns: line array [{x, y, color}] or `null`.
+      //
       for (let y = 0; y < fieldSize; y++) {
         for (let x = 0; x <= fieldSize - minLineLength; x++) {
-          let line = findHorizontalLine(x + 1, y, [
-            {
-              "x": x,
-              "y": y,
-              "color": field[x][y],
+          // Start search for a line only if current cell has a ball in it
+          if (field[x][y]) {
+            let line = findHorizontalLine(x + 1, y, [
+              {
+                "x": x,
+                "y": y,
+                "color": field[x][y],
+              }
+            ])
+            if (line.length >= minLineLength) {
+              return line;
             }
-          ])
-          if (line.length >= minLineLength) {
-            return line;
           }
         }
       }
