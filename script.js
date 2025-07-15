@@ -1,6 +1,6 @@
-//
-// Global stuff
-//
+/**
+ * Глобальные данные игры
+ */
 const fieldSize = 9;
 const ballColors = ["purple", "red", "blue", "navy", "yellow", "green"];
 const newBallsEachTurn = 3;
@@ -9,9 +9,11 @@ let field = [];
 let isGameOver = true;
 let selectedBall = null;
 
-//
-// Game logic functions
-//
+// MARK: Логика
+
+/**
+ * Очищает игровое поле.
+ */
 function resetFieldArray() {
   for (let i = 0; i < fieldSize; i++) {
     field[i] = [];
@@ -21,8 +23,12 @@ function resetFieldArray() {
   }
 }
 
+/**
+ * Возвращает массив свободных ячеек игрового поля. Каждый элемент массива
+ * представляет собой объект вида `{x: 0, y: 0}`, где (x, y) - координаты свободной ячейки на поле.
+ * @returns {Array} Массив свободных ячеек.
+ */
 function getFreeCells() {
-  // Returns list of free cells in field array, each cell represented by object like {x: 0, y: 0}
   let freeCells = [];
   for (let y = 0; y < fieldSize; y++) {
     for (let x = 0; x < fieldSize; x++) {
@@ -34,36 +40,45 @@ function getFreeCells() {
   return freeCells;
 }
 
+/**
+ * Возвращает случайную свободную ячейку игрового поля.
+ * Если свободных ячеек нет, возвращает `null`.
+ * @returns {Object|null} Случайная свободная ячейка в виде объекта `{x: 0, y: 0}` или `null`, если свободных ячеек нет.
+ */
 function getRandomFreeCell() {
-  // Returns random free cell coords as object {x: 0, y: 0}
   let freeCells = getFreeCells();
   let randomFreeCell = null;
 
   if (freeCells) {
     let randomCellIndex = Math.floor(Math.random() * freeCells.length);
-    // console.log(freeCells);
     randomFreeCell = freeCells[randomCellIndex];
   }
 
   return randomFreeCell;
 }
 
+/**
+ * Возвращает случайный цвет из массива `ballColors`.
+ * @returns {string} Случайный цвет из массива `ballColors`.
+ */
 function getRandomColor() {
-  // Returns a random color name
   let randomColorIndex = Math.floor(Math.random() * ballColors.length);
   return ballColors[randomColorIndex];
 }
 
+/**
+ * Добавляет случайный шарик на игровое поле.
+ * Если свободные ячейки есть, добавляет шарик и возвращает `true`.
+ * Если свободных ячеек нет, возвращает `false`.
+ * @returns {boolean} `true`, если шарик был добавлен, иначе `false`.
+ */
 function addRandomBall() {
-  // Adds a random ball to the game field
-  // Returns true if ball was added, otherwise false
   let randomFreeCell = getRandomFreeCell();
 
   if (randomFreeCell) {
     let x = randomFreeCell.x;
     let y = randomFreeCell.y;
     let color = getRandomColor();
-    // console.log(`Random cell is (${x}, ${y}); random color is ${color}`);
     field[x][y] = color;
     return true;
   } else {
@@ -71,10 +86,13 @@ function addRandomBall() {
   }
 }
 
+/**
+ * Добавляет новые шарики на игровое поле после хода игрока.
+ * Если свободные ячейки есть, добавляет заданное количество шариков (`newBallsEachTurn`).
+ * Если свободных ячеек нет, завершает игру, устанавливая `isGameOver` в `true`.
+ * @returns {void}
+ */
 function addNewBalls() {
-  //
-  // Adds new balls to the field after player's move
-  //
   for (let i = 0; i < newBallsEachTurn; i++) {
     if (!addRandomBall()) {
       isGameOver = true;
@@ -83,12 +101,18 @@ function addNewBalls() {
   }
 }
 
+/**
+ * Находит кратчайший путь от одной ячейки к другой с помощью алгоритма A*.
+ * Использует библиотеку astar.js для поиска пути.
+ * @param {number} startX - Координата X начальной ячейки.
+ * @param {number} startY - Координата Y начальной ячейки.
+ * @param {number} endX - Координата X конечной ячейки.
+ * @param {number} endY - Координата Y конечной ячейки.
+ * @returns {Array} Массив, содержащий кратчайший путь от начальной ячейки к конечной.
+ *                  Если длина массива равна нулю, значит путь не найден.
+ */
 function findPath(startX, startY, endX, endY) {
-  // Return array containing the shortest path
-  // Length of array equal to zero means there's no available path.
-
-  // Create array for astar.js
-  // 0 = wall, 1 = clear
+  // Создадим массив для astar.js
   let graphArray = [];
   for (let i = 0; i < fieldSize; i++) {
     graphArray[i] = [];
@@ -104,29 +128,31 @@ function findPath(startX, startY, endX, endY) {
   let start = graph.grid[startX][startY];
   let end = graph.grid[endX][endY];
 
-  return astar.search(graph, start, end); // return array containing the shortest path
+  return astar.search(graph, start, end);
 }
 
+/**
+ * Проверяет, есть ли в массиве `field` линия шариков одного цвета (горизонтальная или вертикальная).
+ * Если линия найдена, возвращает массив объектов с информацией о ячейках линии
+ * `[{x, y, color}]`. Если линии нет, возвращает `null`.
+ * @returns {Array|null} Массив с информацией о найденной линии или `null`, если линия не найдена.
+ */
 function findLine(x, y, dx, dy, lineArray) {
-  //
-  // Recursive function to find a line of balls of the same color in the `field` array.
-  // Currently ONLY horizontal/vertical lines.
-  // on first call, lineArray[0] contains object with info about starting cell
-  // {x, y, color}
+  // При первом вызове lineArray[0] содержит объект с информацией о начальной ячейке - {x, y, color}
   let prevColor = lineArray[lineArray.length - 1].color;
 
   let color = field[x][y];
   if (color == null || color != prevColor) {
-    // If current cell is clear or contains ball of another color, end recursion
+    // Если текущая ячейка пустая или цвет шарика не совпадает с предыдущим, завершаем поиск
     return lineArray;
   }
 
   if (color == prevColor) {
-    // Add this cell to line array
+    // Добавляем текущую ячейку с шариком совпадающего цвета в массив линии
     lineArray.push({ x: x, y: y, color: color });
   }
 
-  // Decide if we stop or continue recursion
+  // Решаем, нужно ли продолжать поиск в текущем направлении
   if ((dx && x == fieldSize - 1) || (dy && y == fieldSize - 1)) {
     return lineArray;
   } else {
@@ -134,12 +160,14 @@ function findLine(x, y, dx, dy, lineArray) {
   }
 }
 
+/**
+ * Ищет линии шариков одного цвета в массиве `field`.
+ * Проверяет горизонтальные и вертикальные линии, начиная с каждой ячейки.
+ * Если линия найдена, возвращает массив объектов с информацией о ячейках линии
+ * `[{x, y, color}]`. Если линии нет, возвращает null.
+ * @returns {Array|null} Массив с информацией о найденной линии или `null`, если линия не найдена.
+ */
 function searchForLines() {
-  //
-  // Scans `field` for lines of balls of same color with `minLineLength`
-  // (Currently ONLY horizontal/vertical lines!)
-  // Returns: line array [{x, y, color}] or `null`.
-  //
   const deltas = [
     { dx: 1, dy: 0 },
     { dx: 0, dy: 1 },
@@ -154,7 +182,7 @@ function searchForLines() {
 
     for (let y = 0; y < maxY; y++) {
       for (let x = 0; x < maxX; x++) {
-        // Start search for a line only if current cell has a ball in it
+        // Начинаем поиск линии с текущей ячейки, только если в ней есть шарик
         if (field[x][y]) {
           let line = findLine(x + dx, y + dy, dx, dy, [
             {
@@ -174,19 +202,28 @@ function searchForLines() {
   return null;
 }
 
-function removeLine(
-  lineArray, // array of objects {x, y, color}
-) {
+/**
+ * Удаляет линию шариков из массива `field`.
+ * Принимает массив объектов с информацией о ячейках линии `[{x, y, color}].`
+ * Удаляет шарики из ячеек, установив их значение в `null`.
+ * @param {Array} lineArray - Массив объектов с информацией о ячейках линии
+ *                            `[{x, y, color}]`.
+ */
+function removeLine(lineArray) {
   lineArray.forEach((value) => {
     field[value.x][value.y] = null;
   });
 }
 
-//
-// Interface functions
-//
+// MARK: Интерфейс
+
+/**
+ * Отрисовывает шарики на игровом поле.
+ * Рендерит массив `field` в виде сетки в элементе `field`.
+ * Если шарик выбран, добавляет класс `ball-selected` к соответствующему элементу.
+ * Если ячейка пуста, оставляет ее пустой.
+ */
 function drawBalls() {
-  // Renders `field` array to the `field` div grid
   for (let y = 0; y < fieldSize; y++) {
     for (let x = 0; x < fieldSize; x++) {
       let cellDiv = document.getElementById(`cell-${x}-${y}`);
@@ -212,10 +249,13 @@ function drawBalls() {
   }
 }
 
+/**
+ * Обработчик клика по шарикам.
+ * Устанавливает `selectedBall` в координаты выбранного шарика и перерисовывает поле.
+ * @param {Event} event - Событие клика по шарикам.
+ */
 function onBallClick(event) {
-  // Sets `selectedBall` to the clicked ball's (x,y), then redraws the field
   if (event.target.id.startsWith("ball-")) {
-    // console.log(`Ball selected (x=${event.target.dataset.x}, y=${event.target.dataset.y})`);
     selectedBall = {
       x: event.target.dataset.x,
       y: event.target.dataset.y,
@@ -226,33 +266,34 @@ function onBallClick(event) {
   event.stopPropagation();
 }
 
+/**
+ * Обработчик клика по свободным ячейкам. Перемещает выбранный шарик в ячейку, если она свободна,
+ * и есть путь от шарика к этой ячейке. Добавляет новые шарики после хода игрока.
+ * Проверяет наличие линий. Если линия найдена, удаляет ее из поля. Перерисовывает поле.
+ * @param {Event} event - Событие клика по ячейкам.
+ */
 function onCellClick(event) {
-  // Moves selected ball to the clicked cell (if it's free), then redraws the field.
   if (event.target.id.startsWith("cell-")) {
     let x = event.target.dataset.x;
     let y = event.target.dataset.y;
-    // console.log(`Cell (x=${x}, y=${y})`);
 
     if (selectedBall) {
+      // Действуем только если ячейка свободна
       if (field[x][y] == null) {
-        // Act only if the clicked cell is free!
-
         let path = findPath(selectedBall.x, selectedBall.y, x, y);
-        // console.log(path);
 
         if (path.length) {
-          // Actually move the ball if there's path, reset stuff
+          // Если есть путь для шарика в ячейку, перемещаем шарик
           let color = field[selectedBall.x][selectedBall.y];
           field[selectedBall.x][selectedBall.y] = null;
           field[x][y] = color;
           selectedBall = null;
+
           unlitAllCells();
           addNewBalls();
 
           line = searchForLines();
           if (line) {
-            console.log("FOUND A LINE!");
-            console.log(line);
             removeLine(line);
           }
         }
@@ -265,17 +306,33 @@ function onCellClick(event) {
   event.stopPropagation();
 }
 
+/**
+ * Получает элемент ячейки по координатам (x, y).
+ * Используется для получения элемента ячейки по ID, который формируется как `cell-x-y`.
+ * @param {number} x - Координата X ячейки.
+ * @param {number} y - Координата Y ячейки.
+ * @returns {HTMLElement} Элемент ячейки с ID `cell-x-y`.
+ */
 function getCellDiv(x, y) {
   const cellID = `cell-${x}-${y}`;
   return document.getElementById(cellID);
 }
 
+/**
+ * Подсвечивает ячейку, представляющую собой часть пути от шарика к целевой ячейке.
+ * Добавляет класс `cell-highlight-path` к элементу ячейки.
+ * Используется для визуального выделения пути, найденного алгоритмом A*.
+ * @param {Object} value - Объект с координатами ячейки, содержащий свойства `x` и `y`.
+ */
 function highlightCell(value) {
-  // `value` is a cell object from astar.js-generated path
   let cellDiv = getCellDiv(value.x, value.y);
   cellDiv.classList.add("cell-highlight-path");
 }
 
+/**
+ * Снимает подсветку со всех ячеек, удаляя класс `cell-highlight-path`.
+ * Используется для сброса состояния ячеек после завершения подсветки пути.
+ */
 function unlitAllCells() {
   for (let y = 0; y < fieldSize; y++) {
     for (let x = 0; x < fieldSize; x++) {
@@ -284,41 +341,42 @@ function unlitAllCells() {
   }
 }
 
+/**
+ * Обработчик наведения мыши на ячейки.
+ * Если выбран шарик, пытается найти путь от шарика к текущей ячейке.
+ * Если путь найден, подсвечивает ячейку шарика и путь к целевой ячейке.
+ * Если путь не найден, ничего не делает.
+ * @param {Event} event - Событие наведения мыши на ячейки.
+ */
 function onCellMouseEnter(event) {
-  //
-  // If a ball selected, try to build path to underlying cell and highlight the path.
-  //
   let x = event.target.dataset.x;
   let y = event.target.dataset.y;
-  // console.log(`> Mouse entered cell (x=${x}, y=${y})`);
 
   if (selectedBall) {
-    // Try to find the path for selected ball to the current cell
     let path = findPath(selectedBall.x, selectedBall.y, x, y);
     if (path.length) {
-      // console.log('Ball can get here!');
-      // Highlight ball's location and the path
       highlightCell({ x: selectedBall.x, y: selectedBall.y });
       path.forEach(highlightCell);
-    } else {
-      // console.log('Ball CAN NOT get here!');
     }
   }
 }
 
+/**
+ * Обработчик ухода мыши с ячеек.
+ * Если выбран шарик, снимает подсветку со всех ячеек, возвращая их к исходному состоянию.
+ * Используется для сброса состояния ячеек после наведения мыши.
+ * @param {Event} event - Событие ухода мыши с ячеек.
+ */
 function onCellMouseLeave(event) {
-  //
-  // Reset cells colors to default (if any ball is selected).
-  //
-  let x = event.target.dataset.x;
-  let y = event.target.dataset.y;
-  // console.log(`< Mouse left cell (x=${x}, y=${y})`);
-
   if (selectedBall) {
     unlitAllCells();
   }
 }
 
+/**
+ * Обработчик кнопки "Новая игра".
+ * Если игра завершена, сбрасывает состояние игры, добавляет новые шарики и перерисовывает поле.
+ */
 function newGameButton() {
   if (isGameOver) {
     isGameOver = false;
@@ -327,6 +385,10 @@ function newGameButton() {
   }
 }
 
+/**
+ * Обработчик кнопки "Сбросить игру".
+ * Если игра не завершена, сбрасывает состояние игры, очищает массив `field` и перерисовывает поле.
+ */
 function resetGameButton() {
   if (!isGameOver) {
     isGameOver = true;
@@ -335,11 +397,12 @@ function resetGameButton() {
   }
 }
 
-//
-// Program entry point
-//
+// MARK: Точка входа
 
-// Fill field with cells
+/*
+ * Инициализация игрового поля.
+ * Создает HTML-элементы для ячеек игрового поля и заполняет их пустыми ячейками.
+ */
 fieldDiv = document.getElementById("field");
 for (let y = 0; y < fieldSize; y++) {
   for (let x = 0; x < fieldSize; x++) {
@@ -347,4 +410,8 @@ for (let y = 0; y < fieldSize; y++) {
   }
 }
 
+/*
+ * Сброс состояния игрового поля.
+ * Очищает массив `field`, устанавливая все ячейки в `null`.
+ */
 resetFieldArray();

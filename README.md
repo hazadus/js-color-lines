@@ -1,35 +1,14 @@
 # Color Lines
 
-Classic Color Lines game written in pure HTML, CSS and JS.
+Попытка реализовать классическую игру Color Lines на чистом HTML, CSS и JavaScript.
 
-The main idea was to use CSS effects as much as possible.
+Одна из основных идей – использовать только CSS для оформления и эффектов, без изображений.
 
-Currently does not detect diagonal lines.
+На текущий момент не определяются диагональные линии и не подсчитываются баллы за игру.
 
 ![Screenshot](./images/screenshot.png)
 
-## TODOs:
-
-### Logic
-
-- Detect diagonal lines of same color
-  - https://en.wikipedia.org/wiki/Hough_transform
-- Track game score
-- Save highscore
-
-### UI
-
-- Add timer
-- Full width (with padding) on mobile screen
-- Score field
-- Highscore field
-- Next colors (?)
-
-### System
-
-- Save game state in local storage, restore on page reload.
-
-## References
+## Ссылки на использованные при разработке материалы
 
 - Bounce animation
   - https://www.youtube.com/watch?v=drsUJIBKdXk
