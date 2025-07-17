@@ -153,7 +153,11 @@ function findLine(x, y, dx, dy, lineArray) {
   }
 
   // Решаем, нужно ли продолжать поиск в текущем направлении
-  if ((dx && x == fieldSize - 1) || (dy && y == fieldSize - 1)) {
+  if (
+    (dx && x == fieldSize - 1)
+    || (dy && dy > 0 && y == fieldSize - 1)
+    || (dy && dy < 0 && y == 0)
+  ) {
     return lineArray;
   } else {
     return findLine(x + dx, y + dy, dx, dy, lineArray);
@@ -169,18 +173,35 @@ function findLine(x, y, dx, dy, lineArray) {
  */
 function searchForLines() {
   const deltas = [
-    { dx: 1, dy: 0 },
-    { dx: 0, dy: 1 },
+    { dx: 1, dy: 0 },   // горизонтально
+    { dx: 0, dy: 1 },   // вертикально
+    { dx: 1, dy: 1 },   // диагональ вправо-вниз
+    { dx: 1, dy: -1 },  // диагональ вправо-вверх
   ];
 
   for (let iDelta = 0; iDelta < deltas.length; iDelta++) {
     let dx = deltas[iDelta].dx;
     let dy = deltas[iDelta].dy;
 
+    // Определяем границы для оптимизации поиска
     let maxX = dx ? fieldSize - minLineLength + 1 : fieldSize;
-    let maxY = dy ? fieldSize - minLineLength + 1 : fieldSize;
+    let maxY, minY;
 
-    for (let y = 0; y < maxY; y++) {
+    if (dy > 0) {
+      // Для направлений вниз
+      maxY = fieldSize - minLineLength + 1;
+      minY = 0;
+    } else if (dy < 0) {
+      // Для направлений вверх
+      maxY = fieldSize;
+      minY = minLineLength - 1;
+    } else {
+      // Для горизонтального направления
+      maxY = fieldSize;
+      minY = 0;
+    }
+
+    for (let y = minY; y < maxY; y++) {
       for (let x = 0; x < maxX; x++) {
         // Начинаем поиск линии с текущей ячейки, только если в ней есть шарик
         if (field[x][y]) {
