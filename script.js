@@ -311,11 +311,13 @@ function onCellClick(event) {
           selectedBall = null;
 
           unlitAllCells();
-          addNewBalls();
 
           line = searchForLines();
           if (line) {
             removeLine(line);
+          } else {
+            // Новые шарики добавляются, только если линия не собрана
+            addNewBalls();
           }
         }
 
