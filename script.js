@@ -27,7 +27,7 @@ function resetFieldArray() {
  * Запускает новую игру.
  */
 function startGame() {
-  if(isGameOver) {
+  if (isGameOver) {
     isGameOver = false;
     resetFieldArray();
     addNewBalls();
@@ -38,7 +38,7 @@ function startGame() {
  * Сбрасывает состояние игры.
  */
 function resetGame() {
-  if(!isGameOver) {
+  if (!isGameOver) {
     isGameOver = true;
     resetFieldArray();
   }
@@ -91,7 +91,7 @@ function getRandomColor() {
  * Устанавливает выбранный шарик по координатам (x, y).
  */
 function selectBall(x, y) {
-  selectedBall = { x: x, y: y};
+  selectedBall = { x: x, y: y };
 }
 
 /**
@@ -181,11 +181,7 @@ function findLine(x, y, dx, dy, lineArray) {
   }
 
   // Решаем, нужно ли продолжать поиск в текущем направлении
-  if (
-    (dx && x == fieldSize - 1)
-    || (dy && dy > 0 && y == fieldSize - 1)
-    || (dy && dy < 0 && y == 0)
-  ) {
+  if ((dx && x == fieldSize - 1) || (dy && dy > 0 && y == fieldSize - 1) || (dy && dy < 0 && y == 0)) {
     return lineArray;
   } else {
     return findLine(x + dx, y + dy, dx, dy, lineArray);
@@ -201,10 +197,10 @@ function findLine(x, y, dx, dy, lineArray) {
  */
 function searchForLine() {
   const deltas = [
-    { dx: 1, dy: 0 },   // горизонтально
-    { dx: 0, dy: 1 },   // вертикально
-    { dx: 1, dy: 1 },   // диагональ вправо-вниз
-    { dx: 1, dy: -1 },  // диагональ вправо-вверх
+    { dx: 1, dy: 0 }, // горизонтально
+    { dx: 0, dy: 1 }, // вертикально
+    { dx: 1, dy: 1 }, // диагональ вправо-вниз
+    { dx: 1, dy: -1 }, // диагональ вправо-вверх
   ];
 
   for (let iDelta = 0; iDelta < deltas.length; iDelta++) {
