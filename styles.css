@@ -8,6 +8,7 @@
   --field-background-color: #191d24;
   --cell-border-color: hsl(var(--bc) / 0.7);
   --cell-background-color: #7b7e86;
+  --cell-highlight-path-color: #bfc3cc;
   --ball-red-color: #ff6b6b;
   --ball-yellow-color: #ffe066;
   --ball-navy-color: #5c7cfa;
@@ -108,7 +109,7 @@ body {
 }
 
 .cell-highlight-path {
-  background-color: var(--cell-border-color);
+  background-color: var(--cell-highlight-path-color);
 }
 
 .ball {
