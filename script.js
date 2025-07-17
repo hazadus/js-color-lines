@@ -24,6 +24,27 @@ function resetFieldArray() {
 }
 
 /**
+ * Запускает новую игру.
+ */
+function startGame() {
+  if(isGameOver) {
+    isGameOver = false;
+    resetFieldArray();
+    addNewBalls();
+  }
+}
+
+/**
+ * Сбрасывает состояние игры.
+ */
+function resetGame() {
+  if(!isGameOver) {
+    isGameOver = true;
+    resetFieldArray();
+  }
+}
+
+/**
  * Возвращает массив свободных ячеек игрового поля. Каждый элемент массива
  * представляет собой объект вида `{x: 0, y: 0}`, где (x, y) - координаты свободной ячейки на поле.
  * @returns {Array} Массив свободных ячеек.
@@ -64,6 +85,13 @@ function getRandomFreeCell() {
 function getRandomColor() {
   let randomColorIndex = Math.floor(Math.random() * ballColors.length);
   return ballColors[randomColorIndex];
+}
+
+/**
+ * Устанавливает выбранный шарик по координатам (x, y).
+ */
+function selectBall(x, y) {
+  selectedBall = { x: x, y: y};
 }
 
 /**
@@ -236,6 +264,10 @@ function removeLine(lineArray) {
   });
 }
 
+/**
+ * Ищет линию шариков в массиве `field` и удаляет ее, если она найдена.
+ * @returns {boolean} `true`, если линия найдена и удалена, иначе `false`.
+ */
 function findAndRemoveLine() {
   let line = searchForLine();
   if (line) {
@@ -327,10 +359,10 @@ function drawBalls() {
  */
 function onBallClick(event) {
   if (event.target.id.startsWith("ball-")) {
-    selectedBall = {
-      x: event.target.dataset.x,
-      y: event.target.dataset.y,
-    };
+    const x = parseInt(event.target.dataset.x, 10);
+    const y = parseInt(event.target.dataset.y, 10);
+
+    selectBall(x, y);
     drawBalls();
   }
 
@@ -402,8 +434,8 @@ function unlitAllCells() {
  * @param {Event} event - Событие наведения мыши на ячейки.
  */
 function onCellMouseEnter(event) {
-  let x = event.target.dataset.x;
-  let y = event.target.dataset.y;
+  let x = parseInt(event.target.dataset.x, 10);
+  let y = parseInt(event.target.dataset.y, 10);
 
   if (selectedBall) {
     let path = findPath(selectedBall.x, selectedBall.y, x, y);
@@ -418,9 +450,8 @@ function onCellMouseEnter(event) {
  * Обработчик ухода мыши с ячеек.
  * Если выбран шарик, снимает подсветку со всех ячеек, возвращая их к исходному состоянию.
  * Используется для сброса состояния ячеек после наведения мыши.
- * @param {Event} event - Событие ухода мыши с ячеек.
  */
-function onCellMouseLeave(event) {
+function onCellMouseLeave() {
   if (selectedBall) {
     unlitAllCells();
   }
@@ -431,23 +462,17 @@ function onCellMouseLeave(event) {
  * Если игра завершена, сбрасывает состояние игры, добавляет новые шарики и перерисовывает поле.
  */
 function newGameButton() {
-  if (isGameOver) {
-    isGameOver = false;
-    addNewBalls();
-    drawBalls();
-  }
+  startGame();
+  drawBalls();
 }
 
 /**
  * Обработчик кнопки "Сбросить игру".
- * Если игра не завершена, сбрасывает состояние игры, очищает массив `field` и перерисовывает поле.
+ * Если игра не завершена, сбрасывает состояние игры и перерисовывает поле.
  */
 function resetGameButton() {
-  if (!isGameOver) {
-    isGameOver = true;
-    resetFieldArray();
-    drawBalls();
-  }
+  resetGame();
+  drawBalls();
 }
 
 // MARK: Точка входа
