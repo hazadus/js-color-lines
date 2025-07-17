@@ -171,7 +171,7 @@ function findLine(x, y, dx, dy, lineArray) {
  * `[{x, y, color}]`. Если линии нет, возвращает null.
  * @returns {Array|null} Массив с информацией о найденной линии или `null`, если линия не найдена.
  */
-function searchForLines() {
+function searchForLine() {
   const deltas = [
     { dx: 1, dy: 0 },   // горизонтально
     { dx: 0, dy: 1 },   // вертикально
@@ -236,6 +236,56 @@ function removeLine(lineArray) {
   });
 }
 
+function findAndRemoveLine() {
+  let line = searchForLine();
+  if (line) {
+    removeLine(line);
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Обрабатывает ход игрока, перемещая выбранный шарик в целевую ячейку.
+ * Проверяет, есть ли путь от выбранного шарика к целевой ячейке.
+ * Если путь найден, перемещает шарик и проверяет наличие линии шариков.
+ * Если линия найдена, удаляет ее из поля. Если линии нет,
+ * добавляет новые шарики на поле.
+ * @param {number} toX - Координата X целевой ячейки.
+ * @param {number} toY - Координата Y целевой ячейки.
+ * @returns {boolean} `true`, если ход успешно выполнен, иначе `false`.
+ */
+function handlePlayerMove(toX, toY) {
+  // Ход игрока в целевую ячейку невозможен, если шарик не выбран или ячейка занята
+  if (!selectedBall || field[toX][toY] !== null) {
+    return false;
+  }
+
+  let path = findPath(selectedBall.x, selectedBall.y, toX, toY);
+
+  if (path.length > 0) {
+    // Если есть путь для шарика в ячейку, перемещаем шарик
+    let color = field[selectedBall.x][selectedBall.y];
+    field[selectedBall.x][selectedBall.y] = null;
+    field[toX][toY] = color;
+
+    selectedBall = null;
+
+    // Проверяем, собрана ли линия из шариков
+    let isLine = findAndRemoveLine();
+    if (!isLine) {
+      // Новые шарики добавляются, только если линия не собрана
+      addNewBalls();
+      // После появления шариков линия может собраться, поэтому поищем повторно
+      findAndRemoveLine();
+    }
+
+    return true; // Ход успешно выполнен
+  }
+
+  return false; // Ход невозможен, если нет пути
+}
+
 // MARK: Интерфейс
 
 /**
@@ -288,41 +338,21 @@ function onBallClick(event) {
 }
 
 /**
- * Обработчик клика по свободным ячейкам. Перемещает выбранный шарик в ячейку, если она свободна,
- * и есть путь от шарика к этой ячейке. Добавляет новые шарики после хода игрока.
- * Проверяет наличие линий. Если линия найдена, удаляет ее из поля. Перерисовывает поле.
+ * Обработчик клика по свободным ячейкам. Вызывает обработку логики хода игрока.
  * @param {Event} event - Событие клика по ячейкам.
  */
 function onCellClick(event) {
   if (event.target.id.startsWith("cell-")) {
-    let x = event.target.dataset.x;
-    let y = event.target.dataset.y;
+    // Получаем координаты ячейки, по которой кликнул игрок
+    let x = parseInt(event.target.dataset.x, 10);
+    let y = parseInt(event.target.dataset.y, 10);
 
-    if (selectedBall) {
-      // Действуем только если ячейка свободна
-      if (field[x][y] == null) {
-        let path = findPath(selectedBall.x, selectedBall.y, x, y);
+    const isMoveSuccessful = handlePlayerMove(x, y);
 
-        if (path.length) {
-          // Если есть путь для шарика в ячейку, перемещаем шарик
-          let color = field[selectedBall.x][selectedBall.y];
-          field[selectedBall.x][selectedBall.y] = null;
-          field[x][y] = color;
-          selectedBall = null;
-
-          unlitAllCells();
-
-          line = searchForLines();
-          if (line) {
-            removeLine(line);
-          } else {
-            // Новые шарики добавляются, только если линия не собрана
-            addNewBalls();
-          }
-        }
-
-        drawBalls();
-      }
+    if (isMoveSuccessful) {
+      // Если ход успешен, перерисовываем поле
+      unlitAllCells();
+      drawBalls();
     }
   }
 
