@@ -7,13 +7,13 @@
   --field-border-color: hsl(var(--bc) / 0.7);
   --field-background-color: #191d24;
   --cell-border-color: hsl(var(--bc) / 0.7);
-  --cell-background-color: #2a303c;
-  --ball-red-color: red;
-  --ball-yellow-color: yellow;
-  --ball-navy-color: navy;
-  --ball-blue-color: blue;
-  --ball-purple-color: #6419e6;
-  --ball-green-color: green;
+  --cell-background-color: #7b7e86;
+  --ball-red-color: #ff6b6b;
+  --ball-yellow-color: #ffe066;
+  --ball-navy-color: #5c7cfa;
+  --ball-blue-color: #74c0fc;
+  --ball-purple-color: #b197fc;
+  --ball-green-color: #51cf66;
 
   --primary: #6419e6;
   --secondary: #d926a9;
@@ -49,8 +49,7 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 50vh;
-  min-height: 400px;
+  height: 100vh;
   background: rgb(100, 25, 230);
   background: linear-gradient(135deg, rgba(100, 25, 230, 1) 0%, rgba(217, 38, 169, 1) 100%);
 }
